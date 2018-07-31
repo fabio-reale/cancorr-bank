@@ -1,12 +1,19 @@
-Como mencionei na entrevista, nunca havia lidado com dados categóricos. Acabei decidindo, então, utilizar a técnica de correlação canônica para realizar as análises. Da minha pesquisa sobre técnicas aplicáveis a esse tipo de dado, escolhi essa por ser a mais geral, de maneira que eu poderia aplicar a mesma técnica para responder todas as perguntas. A desvantagem é que esse método é maximalmente útil para primeiras análises, ou seja, para ter uma ideia inicial do tipo de relação a ser encontrada.
+Como mencionei na entrevista, nunca havia lidado com dados categóricos. Acabei decidindo, então, utilizar a técnica de 
+correlação canônica para realizar as análises. Da minha pesquisa sobre técnicas aplicáveis a esse tipo de dado, escolhi 
+essa por ser a mais geral, de maneira que eu poderia aplicar a mesma técnica para responder todas as perguntas. A desvantagem
+é que esse método é maximalmente útil para primeiras análises, ou seja, para ter uma ideia inicial do tipo de relação a ser
+encontrada.
 
-Utilizei o termo "significativo" algumas vezes. O termo não deve ser entendido como significância estatística. Nenhum teste de hipótese foi aplicado, uma vez que, em correlação canônica, hipótese de normalidade é exigida para isso.
+Utilizei o termo "significativo" algumas vezes. O termo não deve ser entendido como significância estatística. Nenhum teste
+de hipótese foi aplicado, uma vez que, em correlação canônica, hipótese de normalidade é exigida para isso.
 
 
 
 1. Qual profissão tem mais tendência a fazer um empréstimo? De qual tipo?
 
-A primeira variante canônica domina a análise. Observamos que a correlação com profissões na categoria "blue-collar" é a mais alta por uma boa margem. A categoria de serviços é a única outra que apresenta correlação positiva significativa. Aposentados correlaciona negativamente com empréstimos, de maneira significativa.
+A primeira variante canônica domina a análise. Observamos que a correlação com profissões na categoria "blue-collar" é a mais
+alta por uma boa margem. A categoria de serviços é a única outra que apresenta correlação positiva significativa. Aposentados
+correlaciona negativamente com empréstimos, de maneira significativa.
 
 > quickvis(data, [2], [7,8])
 
@@ -14,7 +21,10 @@ A primeira variante canônica domina a análise. Observamos que a correlação c
 
 2. Fazendo uma relação entre o número de contatos e sucesso da campanha quais são os pontos relevantes a serem observados?
 
-O número de contatos é uma variável com pouco poder de explicação. Apesar dos dados mostrarem uma correlação negativa entre o número de ligações e o sucesso da campanha (indicando que aumento em ligações diminui a chance de sucesso), a correlação é baixa. A variável mais relevante é a duração das ligações, maiores durações tem maiores índices de sucesso. Contato por celular, no entanto, também correlaciona significativamente com sucesso.
+O número de contatos é uma variável com pouco poder de explicação. Apesar dos dados mostrarem uma correlação negativa entre 
+o número de ligações e o sucesso da campanha (indicando que aumento em ligações diminui a chance de sucesso), a correlação 
+é baixa. A variável mais relevante é a duração das ligações, maiores durações tem maiores índices de sucesso. Contato por 
+celular, no entanto, também correlaciona significativamente com sucesso.
 
 > quickvis(data, [9,10,11,12,13], [17])
 > quickvis(data, [9,12,13], [17])
@@ -32,7 +42,11 @@ Em média 1,5. Com um máximo de 3. Cálculo realizado foi a média ponderada en
 
 4. O resultado da campanha anterior tem relevância na campanha atual?
 
-Considerando apenas o resultado, a campanha anterior ser bem sucedida é o melhor preditor de sucesso dessa campanha. Quando realizamos a correlação canônica com todas as variáveis da campanha anterior, observamos que o número de dias entre o último contato da campanha anterior tem correlação positiva significativa com o sucesso da campanha atual. A conclusão então é a de que os clientes cuja campanha anterior foi bem sucedida são mais propensos a aceitar a nova campanha, em especial se faz tempo que a campanha anterior foi realizada.
+Considerando apenas o resultado, a campanha anterior ser bem sucedida é o melhor preditor de sucesso dessa campanha. Quando 
+realizamos a correlação canônica com todas as variáveis da campanha anterior, observamos que o número de dias entre o último 
+contato da campanha anterior tem correlação positiva significativa com o sucesso da campanha atual. A conclusão então é a de 
+que os clientes cuja campanha anterior foi bem sucedida são mais propensos a aceitar a nova campanha, em especial se faz 
+tempo que a campanha anterior foi realizada.
 
  > quickvis(data, [16], [17])
  > quickvis(data, [14,15,16], [17])
@@ -41,7 +55,8 @@ Considerando apenas o resultado, a campanha anterior ser bem sucedida é o melho
 
 5. Qual o fator determinante para que o banco exija um seguro de crédito?
 
-A variável com maior poder de explicação é "saldo", que está negativamente correlacionada com a variável "default". Ou seja, "saldo" baixo deve ser o critério determinante.
+A variável com maior poder de explicação é "saldo", que está negativamente correlacionada com a variável "default". Ou seja, 
+"saldo" baixo deve ser o critério determinante.
 
 > quickvis(data, [1,2,3,4,6], [5])
 
@@ -51,6 +66,8 @@ A variável com maior poder de explicação é "saldo", que está negativamente 
 
 São jovens, com profissões na categoria "blue-collar", não são solteiros e tem saldo baixo.
 
-Outras observações apontadas pela correlação canônica são que esses clientes tem educação secundária, o que não surpreende uma vez que a profissão predominantemente correlacionada é na categoria "blue-collar". Além disso, quase não há correlação entre empréstimo imobiliário e empréstimo pessoal.
+Outras observações apontadas pela correlação canônica são que esses clientes tem educação secundária, o que não surpreende
+uma vez que a profissão predominantemente correlacionada é na categoria "blue-collar". Além disso, quase não há correlação
+entre empréstimo imobiliário e empréstimo pessoal.
 
  > quickvis(data, [1,2,3,4,5,6,8], [7])
