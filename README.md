@@ -1,6 +1,6 @@
 # semantix-test
 
-O arquivo banktest.jl define funções para realizaço de análise de correlação canônica, tanto para variáveis numéricas quanto categóricas.
+O arquivo banktest.jl define funções para realização de análise de correlação canônica, tanto para variáveis numéricas quanto categóricas.
 
 O arquivo banktest.jl e o arquivo bank-full.csv devem estar na mesma pasta. Presume-se que ao incluir banktest.jl no REPL pwd() seja o diretório onde esses arquivos se encontram. Nesse caso, basta executar o comando include(joinpath(pwd(),"banktest.jl")).
 
