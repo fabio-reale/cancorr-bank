@@ -95,6 +95,14 @@ function buildmultivar(data::Matrix, cols::Vector{Int})
     mapfoldl(x-> preprocess(data,x), hcat, cols)
 end
 
+function buildmultivar2(data::Matrix, cols::Vector{Int})
+    transf_data = preprocess(data,cols[1])
+    for c in cols[2:end]
+        transf_data = [transf_data preprocess(data, c)]
+    end
+    return transf_data
+end
+
 
 """
     cancorr(data, xs, ys) -> U, S, V
