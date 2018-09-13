@@ -1,9 +1,10 @@
-# semantix-test
+# Canonical Correlation in Bank Marketing data set
 
-O arquivo banktest.jl define funções para realização de análise de correlação canônica, tanto para variáveis numéricas quanto categóricas.
+_banktest.jl_ implements methods to aply canonical correlation on the bank marketing dataset freely available at the [Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/bank+marketing)
 
-O arquivo banktest.jl e o arquivo bank-full.csv devem estar na mesma pasta. Presume-se que ao incluir banktest.jl no REPL pwd() seja o diretório onde esses arquivos se encontram. Nesse caso, basta executar o comando include(joinpath(pwd(),"banktest.jl")).
+Compatible with Julia v1.0. Most of the methods are aimed at preprocessing. Methods for the actual cannonical correlation analysis were also implemented, instead of using MultivariateStats.jl package.
 
-Com a inclusão desse arquivo, os dados de bank-full.csv já são carregados em uma variável denominada data.
+To  be implemented in the future:
 
-A documentação das funções desenvolvidas foi inclusa. Dessa forma, basta executar (no REPL) ?func_name para visualizar a documentação. As funções mais importantes são: getlevels, dummify e cancorr.
+ - Visualisation methods
+ - Bootstrapping methods to resample data in order to balance the dataset
