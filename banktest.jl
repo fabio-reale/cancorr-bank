@@ -10,7 +10,7 @@ encountering the first instance of the last level.
 This has been coded to make sure levels named "unknown" or "no" are put last,
 as this makes analysis easier for interpretation.
 """
-function getlevels(data::Matrix{<:Any}, col::Int, max_num_of_levels::Int)
+function getlevels(data::Matrix, col::Int, max_num_of_levels::Int)
     data_lines = size(data,1)
     #=
     Next atribution is important. eltype(levels) will be the same type
@@ -32,7 +32,7 @@ function getlevels(data::Matrix{<:Any}, col::Int, max_num_of_levels::Int)
     movelast!(levels,"no")
     return levels
 end
-getlevels(data::Matrix{<:Any}, col::Int) = getlevels(data,col,size(data,1))
+getlevels(data::Matrix, col::Int) = getlevels(data,col,size(data,1))
 
 
 """
@@ -42,12 +42,12 @@ For the purpose of creating visualizations.
 Produces a Vector{String} with the names of the levels used in cancorr as well
 as the name of the variable itself.
 """
-function getlevelnames(data::Matrix{<:Any}, col::Int, levels::Vector{<:Any})
+function getlevelnames(data::Matrix, col::Int, levels::Vector)
     pop!(levels)
     return map(x-> data[1,col]*":"*x, levels)
 end
-getlevelnames(data::Matrix{<:Any}, col::Int, levels::Vector{<:Real}) = data[1,col]
-getlevelnames(data::Matrix{<:Any}, col::Int) = getlevelnames(data,col,getlevels(data,col))
+getlevelnames(data::Matrix, col::Int, levels::Vector{<:Real}) = data[1,col]
+getlevelnames(data::Matrix, col::Int) = getlevelnames(data,col,getlevels(data,col))
 
 
 """
@@ -78,7 +78,7 @@ preprocess(data::Matrix, col::Int) = preprocess(data,col,getlevels(data,col))
 Alters matrix data acording to transformation defined by Function p. Ideally, p is of the form x-> x == k ? x = string(A) : x = string(B).
 It is adviseable to make a copy of data prior to calling this function
 """# "With great powers..." Use this wisely!
-function categorize!(data::Matrix{<:Any}, col::Int, p::Function)
+function categorize!(data::Matrix, col::Int, p::Function)
     for i in 2:size(data,1)
         data[i,col] = p(data[i,col])
     end
@@ -89,9 +89,9 @@ end
     buildmultivar(data, cols::Vector{Int}) -> Matrix{Float64}
 
 Creates a matrix from the columns of matrix data specified in cols, making sure
-cathegorical variables are included as indicator (dummy) variables
+nominal variables are included as indicator (dummy) variables
 """
-function buildmultivar(data::Matrix{<:Any}, cols::Vector{Int})
+function buildmultivar(data::Matrix, cols::Vector{Int})
     mapfoldl(x-> preprocess(data,x), hcat, cols)
 end
 
@@ -105,7 +105,7 @@ extracted from the indices specified in Vector ys. Columns of U are the
 cannonical loadings for X, columns of V are cannonical ladings for Y.
 U,S,V is the output of a call to function svd.
 """
-function cancorr(data::Matrix{<:Any}, xs::Vector{Int}, ys::Vector{Int})
+function cancorr(data::Matrix, xs::Vector{Int}, ys::Vector{Int})
     X = buildmultivar(data,xs)
     Y = buildmultivar(data,ys)
     Sx = cov(X,corrected=false)
@@ -117,7 +117,7 @@ end
 
 
 # Just a quick coded function to visualize results of cancorr
-function quickvis(data::Matrix{<:Any}, xs::Vector{Int}, ys::Vector{Int})
+function quickvis(data::Matrix, xs::Vector{Int}, ys::Vector{Int})
     U,d,V = cancorr(data,xs,ys)
     D = diagm(0 => d) # == Matrix(Diagonal(d))
     xnames = mapfoldl(x-> getlevelnames(data,x), vcat, xs)
@@ -135,7 +135,7 @@ end
 
 If val is element of vec, alters vec so that vec[end] == val
 """
-function movelast!(vec::Vector{<:Any}, val)
+function movelast!(vec::Vector, val)
     ind = findfirst(x-> x == val, vec);
     if ind != nothing
         vec[ind] = vec[end];
