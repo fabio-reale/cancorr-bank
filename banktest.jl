@@ -1,3 +1,5 @@
+using DelimitedFiles, Statistics, LinearAlgebra
+
 """
     getlevels(data, col[, max_num_of_levels]) -> Vector
 
@@ -33,7 +35,6 @@ end
 getlevels(data::Matrix{<:Any}, col::Int) = getlevels(data,col,size(data,1))
 
 
-
 """
     getlevelnames(data, col, levels) -> Vector{String}
 
@@ -49,28 +50,26 @@ getlevelnames(data::Matrix{<:Any}, col::Int, levels::Vector{<:Real}) = data[1,co
 getlevelnames(data::Matrix{<:Any}, col::Int) = getlevelnames(data,col,getlevels(data,col))
 
 
-
 """
-    dummify(data, col[, levels]) -> Matrix{Float64}
+    preprocess(data, col[, levels]) -> Matrix{Float64}
 
-Returns a matrix of dummy indicator variables, one for each of the categories
-contained in the col-th column of matrix data, except for the last level.
-This exception is a consequence of the last level being uniquely defined from
+Preprocesses col-th column of data. If the list of levels is provided preprocess is more efficient.
+When the levels of the selected column are nominal, preprocess returns a matrix of dummy indicator variables, one for each of the categories
+contained in the given column of matrix data, with except for the last level. This exception is a consequence of the last level being uniquely defined from
 the others. Including the last level would make the output matrix a singular one.
-The list of levels can be provided for efficiency.
-If levels are Real valued, outputs a Vector.
+When the levels of the selected column are numerical, preprocess returns a vector of those values converted to Float64.
 """
-function dummify(data::Matrix{<:Any}, col::Int, levels::Vector{<:Any})
+function preprocess(data::Matrix, col::Int, levels::Vector)
     l = size(data,1)-1
     c = size(levels,1)-1
-    dummy = Matrix{Bool}(l, c)
+    temp = Matrix{Bool}(undef, l, c)
     for i in 1:c
-        dummy[:,i] = map(x-> x == levels[i], data[2:end,col])
+        temp[:,i] = map(x-> x == levels[i], data[2:end,col])
     end
-    return float(dummy)
+    return float(temp)
 end
-dummify(data::Matrix{<:Any}, col::Int, levels::Vector{<:Real}) = map(x->float(x),data[2:end,col])
-dummify(data::Matrix{<:Any}, col::Int) = dummify(data,col,getlevels(data,col))
+preprocess(data::Matrix, col::Int, levels::Vector{<:Real}) = map(float, data[2:end,col])
+preprocess(data::Matrix, col::Int) = preprocess(data,col,getlevels(data,col))
 
 
 """
@@ -78,13 +77,13 @@ dummify(data::Matrix{<:Any}, col::Int) = dummify(data,col,getlevels(data,col))
 
 Alters matrix data acording to transformation defined by Function p. Ideally, p is of the form x-> x == k ? x = string(A) : x = string(B).
 It is adviseable to make a copy of data prior to calling this function
-"""
-# "With great powers..." Use this wisely!
+"""# "With great powers..." Use this wisely!
 function categorize!(data::Matrix{<:Any}, col::Int, p::Function)
     for i in 2:size(data,1)
         data[i,col] = p(data[i,col])
     end
 end
+
 
 """
     buildmultivar(data, cols::Vector{Int}) -> Matrix{Float64}
@@ -93,9 +92,8 @@ Creates a matrix from the columns of matrix data specified in cols, making sure
 cathegorical variables are included as indicator (dummy) variables
 """
 function buildmultivar(data::Matrix{<:Any}, cols::Vector{Int})
-    mapfoldl(x-> dummify(data,x), hcat, cols)
+    mapfoldl(x-> preprocess(data,x), hcat, cols)
 end
-
 
 
 """
@@ -110,19 +108,18 @@ U,S,V is the output of a call to function svd.
 function cancorr(data::Matrix{<:Any}, xs::Vector{Int}, ys::Vector{Int})
     X = buildmultivar(data,xs)
     Y = buildmultivar(data,ys)
-    Sx = cov(X,1,false)
-    Sy = cov(Y,1,false)
-    Sxy = cov(X,Y,1,false)
+    Sx = cov(X,corrected=false)
+    Sy = cov(Y,corrected=false)
+    Sxy = cov(X,Y,corrected=false)
     M = (Sx^(-0.5))*Sxy*(Sy^(-0.5))
     return svd(M)
 end
 
 
-
 # Just a quick coded function to visualize results of cancorr
 function quickvis(data::Matrix{<:Any}, xs::Vector{Int}, ys::Vector{Int})
     U,d,V = cancorr(data,xs,ys)
-    D = diagm(d)
+    D = diagm(0 => d) # == Matrix(Diagonal(d))
     xnames = mapfoldl(x-> getlevelnames(data,x), vcat, xs)
     ynames = mapfoldl(x-> getlevelnames(data,x), vcat, ys)
     dispx = [xnames U*D]
@@ -133,7 +130,6 @@ function quickvis(data::Matrix{<:Any}, xs::Vector{Int}, ys::Vector{Int})
 end
 
 
-
 """
     movelast!(vec, val)
 
@@ -141,7 +137,7 @@ If val is element of vec, alters vec so that vec[end] == val
 """
 function movelast!(vec::Vector{<:Any}, val)
     ind = findfirst(x-> x == val, vec);
-    if ind != 0
+    if ind != nothing
         vec[ind] = vec[end];
         vec[end] = val;
     end
@@ -162,3 +158,4 @@ data = map(data) do x
     end
 end
 
+println("included: banktest.jl")
