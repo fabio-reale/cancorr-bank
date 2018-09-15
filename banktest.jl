@@ -12,22 +12,17 @@ as this makes analysis easier for interpretation.
 """
 function getlevels(data::Matrix, col::Int, max_num_of_levels::Int)
     data_lines = size(data,1)
-    #=
-    Next atribution is important. eltype(levels) will be the same type
-    eltype(data[2,col]). No type convertion happens here
-    =#
-    levels = [data[2,col]]
-    i = 2
+    # Next atribution ensures levels will preserve type type, without conversion
+    levels = [ data[1, col] ]
+    i = 1
     while i < size(data,1) && length(levels) < max_num_of_levels
         i+= 1
-        if all(x-> (x != data[i,col]), levels)
+        if !(data[i,col] in levels) # all(x-> (x != data[i,col]), levels)
             push!(levels, data[i,col])
         end
     end
-    #=
-    Making sure "unkown" is the last level when exists.
-    Making sure "no" maps to 0.0 on binary categories
-    =#
+    # Making sure "unkown" is the last level when exists.
+    # Making sure "no" maps to 0.0 on binary categories.
     movelast!(levels,"unknown")
     movelast!(levels,"no")
     return levels
@@ -42,12 +37,12 @@ For the purpose of creating visualizations.
 Produces a Vector{String} with the names of the levels used in cancorr as well
 as the name of the variable itself.
 """
-function getlevelnames(data::Matrix, col::Int, levels::Vector)
+function getlevelnames(header::Vector, col::Int, levels::Vector)
     pop!(levels)
-    return map(x-> data[1,col]*":"*x, levels)
+    return map(x-> header[col]*":"*x, levels)
 end
-getlevelnames(data::Matrix, col::Int, levels::Vector{<:Real}) = data[1,col]
-getlevelnames(data::Matrix, col::Int) = getlevelnames(data,col,getlevels(data,col))
+getlevelnames(header::Vector, col::Int, levels::Vector{<:Real}) = header[col]
+getlevelnames(data::Matrix, header::Vector, col::Int) = getlevelnames(header, col, getlevels(data, col))
 
 
 """
@@ -60,16 +55,16 @@ the others. Including the last level would make the output matrix a singular one
 When the levels of the selected column are numerical, preprocess returns a vector of those values converted to Float64.
 """
 function preprocess(data::Matrix, col::Int, levels::Vector)
-    l = size(data,1)-1
+    l = size(data,1)
     c = size(levels,1)-1
     temp = Matrix{Bool}(undef, l, c)
     for i in 1:c
-        temp[:,i] = map(x-> x == levels[i], data[2:end,col])
+        temp[:,i] = map(x-> x == levels[i], data[:,col])
     end
     return float(temp)
 end
-preprocess(data::Matrix, col::Int, levels::Vector{<:Real}) = map(float, data[2:end,col])
-preprocess(data::Matrix, col::Int) = preprocess(data,col,getlevels(data,col))
+preprocess(data::Matrix, col::Int, levels::Vector{<:Real}) = map(float, data[:,col])
+preprocess(data::Matrix, col::Int) = preprocess(data, col, getlevels(data,col))
 
 
 """
@@ -125,11 +120,11 @@ end
 
 
 # Just a quick coded function to visualize results of cancorr
-function quickvis(data::Matrix, xs::Vector{Int}, ys::Vector{Int})
+function quickvis(data::Matrix, header::Vector, xs::Vector{Int}, ys::Vector{Int})
     U,d,V = cancorr(data,xs,ys)
     D = diagm(0 => d) # == Matrix(Diagonal(d))
-    xnames = mapfoldl(x-> getlevelnames(data,x), vcat, xs)
-    ynames = mapfoldl(x-> getlevelnames(data,x), vcat, ys)
+    xnames = mapfoldl(x-> getlevelnames(data,header,x), vcat, xs)
+    ynames = mapfoldl(x-> getlevelnames(data,header,x), vcat, ys)
     dispx = [xnames U*D]
     dispy = [ynames V*D]
     println(d)
@@ -152,18 +147,23 @@ function movelast!(vec::Vector, val)
 end
 
 
-
 #=
 reads the ; separeted file named bank.csv and stores the information in
 data{Any,2}. Strings should be stored as strings and nums as expected num type.
 For that to work, Substrings must be converted to Strings. It's easier that way.
 =#
-data = readdlm("bank-full.csv", ';')
+data, data_names = readdlm("bank-full.csv", ';', header=true)
 data = map(data) do x
     if typeof(x) <: SubString
         convert(String, x)
-    else x
+    else
+        x
     end
 end
-
-println("included: banktest.jl")
+data_names = map(data) do x
+    if typeof(x) <: SubString
+        convert(String, x)
+    else
+        x
+    end
+end
