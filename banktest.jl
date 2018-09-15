@@ -37,12 +37,12 @@ For the purpose of creating visualizations.
 Produces a Vector{String} with the names of the levels used in cancorr as well
 as the name of the variable itself.
 """
-function getlevelnames(header::Vector, col::Int, levels::Vector)
+function getlevelnames(header, col::Int, levels::Vector)
     pop!(levels)
     return map(x-> header[col]*":"*x, levels)
 end
-getlevelnames(header::Vector, col::Int, levels::Vector{<:Real}) = header[col]
-getlevelnames(data::Matrix, header::Vector, col::Int) = getlevelnames(header, col, getlevels(data, col))
+getlevelnames(header, col::Int, levels::Vector{<:Real}) = header[col]
+getlevelnames(data::Matrix, header, col::Int) = getlevelnames(header, col, getlevels(data, col))
 
 
 """
@@ -120,7 +120,7 @@ end
 
 
 # Just a quick coded function to visualize results of cancorr
-function quickvis(data::Matrix, header::Vector, xs::Vector{Int}, ys::Vector{Int})
+function quickvis(data::Matrix, header, xs::Vector{Int}, ys::Vector{Int})
     U,d,V = cancorr(data,xs,ys)
     D = diagm(0 => d) # == Matrix(Diagonal(d))
     xnames = mapfoldl(x-> getlevelnames(data,header,x), vcat, xs)
@@ -160,10 +160,16 @@ data = map(data) do x
         x
     end
 end
-data_names = map(data) do x
+data_names = map(data_names) do x
     if typeof(x) <: SubString
         convert(String, x)
     else
         x
     end
 end
+
+#=
+    Sufficient test:
+quickvis(data, data_names, [1,3], [17])
+1: Int, 3:nominal, 17:boolean
+=#
